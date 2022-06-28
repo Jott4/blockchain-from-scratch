@@ -1,4 +1,5 @@
 {
+  "license": "MIT",
   "dependencies": {
     "crypto-js": "^4.1.1",
     "js-sha256": "^0.9.0",

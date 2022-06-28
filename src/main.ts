@@ -12,6 +12,8 @@ class Block {
   hash: string;
   // hash do bloco anterior
   previousHash: string;
+  // Numero aleatório para garantir que o POW seja dificil o suficiente pra demorar
+  nonce: number;
 
   constructor(index: number, timestamp: string, data: any, previousHash = '') {
     this.index = index;
@@ -19,22 +21,41 @@ class Block {
     this.data = data;
     this.previousHash = previousHash;
     this.hash = this.calculateHash();
-
+    this.nonce = 0;
   }
 
- calculateHash() {
   // concatena o index, timestamp, data e previousHash, e encripta em sha256
-    return sha256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data)).toString();
+ calculateHash() {
+    return sha256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data) + this.nonce).toString();
  }
+
+/*
+POW - Proof of Work
+- POW é usado para garantir que o bloco não sofra "DDOS"
+- O objetvo do POW é encontrar um hash que comece com zeros
+- O POW é um processo iterativo, ou seja, a dificuldade vai aumentando a medida que o processo é executado
+*/
+mineBlock(difficulty: number) {
+  while (this.hash.substring(0, difficulty) !== Array(difficulty + 1).join('0')) {
+    this.nonce++;
+    this.hash = this.calculateHash();
+  }
+  console.log(`Block mined: ${this.hash}`);
+}
+
 
 }
 
 
+
+
+
 class Blockchain {
-  chain: Block[] = [this.createGenesisBlock()];
-
+  chain: Block[];
+  difficulty: number;
   constructor() {
-
+    this.chain = [this.createGenesisBlock()];
+    this.difficulty = 5;
   }
 
   createGenesisBlock() {
@@ -51,8 +72,8 @@ class Blockchain {
   addBlock(newBlock: Block) {
     // Pega o último bloco da chain
     newBlock.previousHash = this.getLatestBlock().hash;
-    // Calcula o hash do bloco
-    newBlock.hash = newBlock.calculateHash();
+    newBlock.mineBlock(this.difficulty);
+
     // Adiciona o bloco à chain
     this.chain.push(newBlock);
   }
@@ -77,14 +98,11 @@ class Blockchain {
 }
 // Cria uma nova blockchain
 let jott4Coin = new Blockchain();
+
 // Adiciona uma nova transação à blockchain
+console.log('Mining block 1...');
 jott4Coin.addBlock(new Block(1, '10/07/2018', { amount: 4 }));
 // Adiciona outro nova bloco à blockchain
+console.log('Mining block 2...');
 jott4Coin.addBlock(new Block(2, '11/07/2018', { amount: 10 }));
 
-console.log(JSON.stringify(jott4Coin, null, 4));
-// Tenta alterar um bloco da blockchain
-jott4Coin.chain[1].data = { amount: 100 };
-jott4Coin.chain[1].hash = jott4Coin.chain[1].calculateHash();
-
-console.log('Is blockchain valid? ' + jott4Coin.isChainValid());
