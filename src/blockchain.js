@@ -1,3 +1,4 @@
+
 const SHA256 = require("crypto-js/sha256");
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
@@ -47,11 +48,18 @@ class Bloco {
         this.hash = this.calculaHash();
         
     }
-
+    // Método para calcular o hash do bloco
     calculaHash() {
         return SHA256(this.hashAnterior + this.timestamp + JSON.stringify(this.transacoes) + this.nonce).toString();
     }
 
+     
+    /*
+    * Método para validar o bloco
+
+    A mineração é dada como concluída quando os n  primeiros caracteres do hash gerado 
+    pela função calculaHash forem iguais a 0
+    */
     mineraBloco(dificuldade) {
         while (this.hash.substring(0, dificuldade) !== Array(dificuldade + 1).join("0")) {
             this.nonce++;
@@ -61,6 +69,7 @@ class Bloco {
         console.log("BLOCO MINERADO: " + this.hash);
     }
 
+    
     temTransacoesValidas() {
         for (const tx of this.transacoes) {
             if (!tx.ehValida()) {
@@ -75,11 +84,11 @@ class Bloco {
 class Blockchain{
     constructor() {
         this.rede = [this.criaBlocoInicial()];
-        this.dificuldade = 1;
+        this.dificuldade = 5;
         this.transacoesPendentes = [];
         this.recompensaDeMineracao = 100;
     }
-
+    // Método para criar o primeiro bloco da blockchain
     criaBlocoInicial() {
         return new Bloco(Date.parse("2017-01-01"), [], "0");
     }
@@ -114,6 +123,10 @@ class Blockchain{
         this.transacoesPendentes.push(transacao);
     }
 
+
+    /**
+     * Pega todas as transações do bloco e reduz ao saldo
+     */
     getSaldo(endereco){
         let saldo = 0;
 
@@ -132,6 +145,10 @@ class Blockchain{
         return saldo;
     }
 
+    /**
+     * 
+     * Itera sob cada bloco e verifica se a o hash anterior é igual ao hash do bloco atual
+     */
     verificaValidadeDaChain() {
         for (let i = 1; i < this.rede.length; i++){
             const blocoAtual = this.rede[i];

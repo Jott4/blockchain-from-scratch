@@ -1,3 +1,4 @@
+console.time();
 const {Blockchain, Transacao} = require('./blockchain');
 const EC = require('elliptic').ec;
 const ec = new EC('secp256k1');
@@ -21,3 +22,5 @@ console.log('\nSaldo do jott4 é:', jott4Coin.getSaldo(meuEndereco));
 
 
 console.log('A chain é válida?', jott4Coin.verificaValidadeDaChain());
+
+console.timeEnd()
